@@ -3,13 +3,15 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-
-from .models import User, AuctionListings, Bids, Comments
+import datetime
+from .models import User, Listings, Bids, Comments
 
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    return render(request, "auctions/index.html", {
+        "listings": list(Listings.objects.values_list())
+    })
 
 
 def login_view(request):
@@ -71,12 +73,20 @@ def create_listing(request):
         bid = request.POST["bid"]
         image = request.POST["image_url"]
         category = request.POST["category"]
+        user = request.user.username
 
         try:
-            listing = AuctionListings.objects.create(name, bid, description, date, user, category)
+            listing = Listings.objects.create(
+                name=name,
+                price=bid,
+                description=description,
+                create_date=datetime.datetime.now(),
+                listed_by=user,
+                category=category,
+                photo=image)
         except IntegrityError:
             return(request, "auctions/create_listing.html", {
                 "message": "Oh..."
             })
-        print("CREATE LISTING", name, description, bid, image, category)
+        # print("CREATE LISTING", name, description, bid, image, category)
     return render(request, "auctions/create_listing.html")

@@ -14,13 +14,14 @@ class User(AbstractUser):
 
     # make migrate
 
-class AuctionListings(models.Model):
+class Listings(models.Model):
     name = models.CharField(max_length=30)
     price = models.FloatField(max_length=30)
     description = models.CharField(max_length=100)
     create_date = models.DateField(max_length=30)
     listed_by = models.CharField(max_length=30)
     category = models.CharField(max_length=30)
+    photo = models.CharField(max_length=500, default='')
 
 class Bids(models.Model):
     bid_price = models.FloatField(max_length=30)

@@ -1,7 +1,28 @@
 {% extends "auctions/layout.html" %}
-
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+
+    {% if listings %}
+        {% for listing in listings %}
+        <div class="post-container">
+            <div class="post-thumb">
+                <!-- image -->
+                <img src="{{ listing.7 }}">
+            </div>
+            <div class="post-content">
+                <!-- name -->
+                <h3 class="post-title">{{ listing.1 }}</h3>
+                <!-- price -->
+                <p><b>Price:</b> ${{ listing.2 }}</p>
+                <!-- description -->
+                <p>{{ listing.3 }}</p>
+                <!-- date -->
+                <sup>{{ listing.4 }}</sup>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div>TODO</div>
+    {% endif %}
 {% endblock %}
