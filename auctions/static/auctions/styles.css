@@ -29,3 +29,21 @@ sup {
     font-size: small;
     color: gray;
 }
+
+.is-watchlist {
+    display: table;
+    padding: 5px;
+    background-color: rgb(24, 145, 24);
+    color: white;
+    border-radius: 5px;
+    font-size: small;
+}
+
+.no-wathlist {
+    display: table;
+    padding: 5px;
+    background-color: gray;
+    color: white;
+    border-radius: 5px;
+    font-size: small;
+}

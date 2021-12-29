@@ -1,0 +1,35 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<h2>Listing: {{ name }}</h2>
+<div class="is-watchlist">Watchlist<br></div>
+<img src="{{ image_url }}">
+<br>
+<p>{{ description }}</p>
+<br>
+<h3><a>${{ price }}</a></h3>
+<form action="{% url 'create_listing' %}" method="POST">
+    {% csrf_token %}
+    <div>
+        <!-- TODO -->
+        <sup>2 bid(s) so far. Your bid is the current bid.</sup>
+        <p><input class="form-control" type="number" name="bid" placeholder="Bid" required></p>
+    </div>
+    <p><input class="btn btn-primary" type="submit" value="Place Bid"></p>
+</form>
+
+<h3>Details:</h3>
+<ul>
+    <li>Listed by: {{ user_by }}</li>
+    <li>Category: {{ category }}</li>
+    <li>Date: {{ create_date }}</li>
+</ul>
+<br>
+<a></a>
+<br>
+<!-- <a>{{ category }}</a> -->
+<br>
+<!-- <a>{{ create_date }}</a> -->
+
+{% endblock %}

@@ -12,7 +12,7 @@
             </div>
             <div class="post-content">
                 <!-- name -->
-                <h3 class="post-title">{{ listing.1 }}</h3>
+                <h3 class="post-title"><a href="{% url 'listing' listing.0 %}">{{ listing.1 }}</a></h3>
                 <!-- price -->
                 <p><b>Price:</b> ${{ listing.2 }}</p>
                 <!-- description -->

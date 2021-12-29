@@ -88,5 +88,17 @@ def create_listing(request):
             return(request, "auctions/create_listing.html", {
                 "message": "Oh..."
             })
-        # print("CREATE LISTING", name, description, bid, image, category)
     return render(request, "auctions/create_listing.html")
+
+def listing(request, id):
+    product = Listings.objects.get(pk=id)
+    return render(request, "auctions/listing.html", {
+        "username": request.user.username,
+        "name": product.__dict__["name"],
+        "description": product.__dict__["description"],
+        "price": product.__dict__["price"],
+        "user_by": product.__dict__["listed_by"],
+        "category": product.__dict__["category"],
+        "create_date": product.__dict__["create_date"],
+        "image_url": product.__dict__["photo"]
+    })
