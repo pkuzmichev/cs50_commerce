@@ -3,7 +3,7 @@
 {% block body %}
 
 <h2>Listing: {{ name }}</h2>
-<div class="is-watchlist">Watchlist<br></div>
+<a href="{% url 'watchlist_add' id %}" role="button" class="is-watchlist btn btn-outline-success btn-lg">Watchlist<br></a>
 <img src="{{ image_url }}">
 <br>
 <p>{{ description }}</p>

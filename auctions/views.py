@@ -1,10 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
+from django.core.checks import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 import datetime
-from .models import User, Listings, Bids, Comments
+from .models import User, Listings, Bids, Comments, Watchlist
 
 
 
@@ -100,5 +101,14 @@ def listing(request, id):
         "user_by": product.__dict__["listed_by"],
         "category": product.__dict__["category"],
         "create_date": product.__dict__["create_date"],
-        "image_url": product.__dict__["photo"]
+        "image_url": product.__dict__["photo"],
+        "id": product.__dict__["id"]
     })
+
+def watchlist_add(request, id):
+    item_to_save = get_object_or_404(Listings, pk=id)
+    if Watchlist.objects.filter(user=request.user, item=id).exists():
+        return HttpResponseRedirect(reverse("auctions:index"))
+    user_list, created = Watchlist.objects.get_or_create(user=request.user)
+    user_list.item.add(item_to_save)
+    return render(request, "auctions/listing.html")
