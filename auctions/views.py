@@ -102,13 +102,43 @@ def listing(request, id):
         "category": product.__dict__["category"],
         "create_date": product.__dict__["create_date"],
         "image_url": product.__dict__["photo"],
-        "id": product.__dict__["id"]
+        "id": product.__dict__["id"],
+        "message": None,
+        "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists()
     })
 
 def watchlist_add(request, id):
+    product = Listings.objects.get(pk=id)
     item_to_save = get_object_or_404(Listings, pk=id)
     if Watchlist.objects.filter(user=request.user, item=id).exists():
-        return HttpResponseRedirect(reverse("auctions:index"))
+        # delete
+        user_list, created = Watchlist.objects.get_or_create(user=request.user)
+        user_list.item.remove(item_to_save)
+        return render(request, "auctions/listing.html", {
+            "username": request.user.username,
+            "name": product.__dict__["name"],
+            "description": product.__dict__["description"],
+            "price": product.__dict__["price"],
+            "user_by": product.__dict__["listed_by"],
+            "category": product.__dict__["category"],
+            "create_date": product.__dict__["create_date"],
+            "image_url": product.__dict__["photo"],
+            "id": product.__dict__["id"],
+            "message": "Product has been added to watchlist",
+            "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists()
+        })
     user_list, created = Watchlist.objects.get_or_create(user=request.user)
     user_list.item.add(item_to_save)
-    return render(request, "auctions/listing.html")
+    return render(request, "auctions/listing.html", {
+        "username": request.user.username,
+        "name": product.__dict__["name"],
+        "description": product.__dict__["description"],
+        "price": product.__dict__["price"],
+        "user_by": product.__dict__["listed_by"],
+        "category": product.__dict__["category"],
+        "create_date": product.__dict__["create_date"],
+        "image_url": product.__dict__["photo"],
+        "id": product.__dict__["id"],
+        "message": "Product has been deleted to watchlist",
+        "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists()
+    })

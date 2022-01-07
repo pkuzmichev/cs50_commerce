@@ -33,7 +33,7 @@ sup {
 .is-watchlist {
     display: table;
     padding: 5px;
-    background-color: rgb(24, 145, 24);
+    background-color: green;
     color: white;
     border-radius: 5px;
     font-size: small;
@@ -42,7 +42,7 @@ sup {
 .no-wathlist {
     display: table;
     padding: 5px;
-    background-color: gray;
+    background-color: red;
     color: white;
     border-radius: 5px;
     font-size: small;

@@ -23,11 +23,13 @@ class Listings(models.Model):
     category = models.CharField(max_length=30)
     photo = models.CharField(max_length=500, default='')
 
+
 class Bids(models.Model):
     bid_price = models.FloatField(max_length=30)
     product = models.FloatField(max_length=30)
     create_date = models.DateField(max_length=30)
     user_by = models.FloatField(max_length=30)
+
 
 class Comments(models.Model):
     comment = models.CharField(max_length=100)
@@ -35,6 +37,7 @@ class Comments(models.Model):
     date = models.DateField(max_length=30)
     product = models.CharField(max_length=30)
 
+
 class Watchlist(models.Model):
-    user = models.ForeignKey(User.objects.get(), on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     item = models.ManyToManyField(Listings)

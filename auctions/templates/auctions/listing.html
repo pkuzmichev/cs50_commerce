@@ -1,10 +1,18 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-
+{% if message == None %}
+{% else %}
+    {{ message }}
+{% endif %}
 <h2>Listing: {{ name }}</h2>
-<a href="{% url 'watchlist_add' id %}" role="button" class="is-watchlist btn btn-outline-success btn-lg">Watchlist<br></a>
-<img src="{{ image_url }}">
+
+{% if watchlist %}
+    <a href="{% url 'watchlist_add' id %}" role="button" class="is-watchlist btn btn-outline-success btn-lg">Watchlist<br></a>
+{% else %}
+    <a href="{% url 'watchlist_add' id %}" role="button" class="no-wathlist btn btn-outline-danger btn-lg">Watchlist<br></a>
+{% endif %}
+<img height="302" width="273" src="{{ image_url }}">
 <br>
 <p>{{ description }}</p>
 <br>
