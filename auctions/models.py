@@ -1,3 +1,4 @@
+import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -25,10 +26,11 @@ class Listings(models.Model):
 
 
 class Bids(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     bid_price = models.FloatField(max_length=30)
-    product = models.FloatField(max_length=30)
+    product = models.IntegerField(max_length=30)
     create_date = models.DateField(max_length=30)
-    user_by = models.FloatField(max_length=30)
+    user_by = models.CharField(max_length=30)
 
 
 class Comments(models.Model):
