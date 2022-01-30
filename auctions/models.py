@@ -23,7 +23,9 @@ class Listings(models.Model):
     listed_by = models.CharField(max_length=30)
     category = models.CharField(max_length=30)
     photo = models.CharField(max_length=500, default='')
-
+    status = models.BooleanField(default=False)
+    winner = models.CharField(max_length=30, default='')
+    win_bid = models.FloatField(max_length=30, default=0)
 
 class Bids(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

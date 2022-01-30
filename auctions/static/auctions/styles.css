@@ -47,3 +47,7 @@ sup {
     border-radius: 5px;
     font-size: small;
 }
+
+.inner {
+    display: inline-block;
+}

@@ -12,6 +12,7 @@ import datetime
 from auctions.verify import check_bid_count, user_by_user, get_max_bid
 from .models import User, Listings, Bids, Comments, Watchlist
 from django.contrib.auth.decorators import login_required
+from django.db.models import Max
 
 
 def index(request):
@@ -104,6 +105,14 @@ def listing(request, id):
     else:
         is_watchlist = Watchlist.objects.filter(
             user=request.user, item=id).exists()
+
+    if product.__dict__["status"] == 1:
+        win_user = product.__dict__["winner"]
+        winner_bid = product.__dict__["win_bid"]
+    else:
+        win_user = None
+        winner_bid = None
+
     return render(request, "auctions/listing.html", {
         "username": request.user.username,
         "name": product.__dict__["name"],
@@ -117,7 +126,9 @@ def listing(request, id):
         "message": None,
         "watchlist": is_watchlist,
         "count_bids": len(list(Bids.objects.filter(
-            product=product.__dict__['id']).values_list("bid_price", flat=True)))
+            product=product.__dict__['id']).values_list("bid_price", flat=True))),
+        "winner": win_user,
+        "win_price": winner_bid
     })
 
 
@@ -193,6 +204,36 @@ def add_bid(request, id):
         "image_url": product.__dict__["photo"],
         "id": product.__dict__["id"],
         "message": message,
+        "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
+        "count_bids": len(list(Bids.objects.filter(
+            product=product.__dict__['id']).values_list("bid_price", flat=True)))
+    })
+
+def close(request, id):
+    product = Listings.objects.get(pk=id)
+
+    product_bids = Bids.objects.filter(product=id)
+    winner_bid = product_bids.filter().aggregate(Max('bid_price'))['bid_price__max']
+
+    Listings.objects.filter(id=id).update(
+        status=True,
+        winner=Bids.objects.get(bid_price=winner_bid).user_by,
+        win_bid=winner_bid
+        )
+
+    win_user = Bids.objects.get(bid_price=winner_bid).user_by
+
+    return render(request, "auctions/listing.html", {
+        "username": request.user.username,
+        "name": product.__dict__["name"],
+        "description": product.__dict__["description"],
+        "price": product.__dict__["price"],
+        "user_by": product.__dict__["listed_by"],
+        "category": product.__dict__["category"],
+        "create_date": product.__dict__["create_date"],
+        "image_url": product.__dict__["photo"],
+        "id": product.__dict__["id"],
+        "message": "Listing was close. Winner: {0}, price: {1}".format(win_user, winner_bid),
         "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
         "count_bids": len(list(Bids.objects.filter(
             product=product.__dict__['id']).values_list("bid_price", flat=True)))
