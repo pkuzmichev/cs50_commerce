@@ -238,3 +238,27 @@ def close(request, id):
         "count_bids": len(list(Bids.objects.filter(
             product=product.__dict__['id']).values_list("bid_price", flat=True)))
     })
+
+@login_required
+def comments(request, id):
+    product = Listings.objects.get(pk=id)
+
+    if request.method == "POST":
+        Comments.objects.create(
+            comment=request.POST["comment"],
+            user_by=request.user.username,
+            date=datetime.datetime.now(),
+            product=Listings.objects.get(pk=id)
+        )
+    print(request)
+    comment = request.POST["comment"]
+   
+    print(comment)
+    print(product.id)
+    product_comments = Comments.objects.filter(product=id)
+    print(product_comments)
+    return render(request, "auctions/comments.html", {
+        "user":  'user',
+        "comment": 'Comment text',
+        "date": 'date from db'
+    })
