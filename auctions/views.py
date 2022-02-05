@@ -5,7 +5,7 @@ from django.core.checks import messages
 from django.db import IntegrityError
 from django.db.models.fields import UUIDField
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 import datetime
 
@@ -257,8 +257,25 @@ def comments(request, id):
     print(product.id)
     product_comments = Comments.objects.filter(product=id)
     print(product_comments)
-    return render(request, "auctions/comments.html", {
-        "user":  'user',
-        "comment": 'Comment text',
-        "date": 'date from db'
+    return render(request, "auctions/listing.html", {
+        "username": request.user.username,
+        "name": product.__dict__["name"],
+        "description": product.__dict__["description"],
+        "price": product.__dict__["price"],
+        "user_by": product.__dict__["listed_by"],
+        "category": product.__dict__["category"],
+        "create_date": product.__dict__["create_date"],
+        "image_url": product.__dict__["photo"],
+        "id": product.__dict__["id"],
+        "message": 'message',
+        "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
+        "count_bids": len(list(Bids.objects.filter(
+            product=product.__dict__['id']).values_list("bid_price", flat=True)))
     })
+
+
+    # return render(request, "auctions/comments.html", {
+    #     "user":  'user',
+    #     "comment": 'Comment text',
+    #     "date": 'date from db'
+    # })
