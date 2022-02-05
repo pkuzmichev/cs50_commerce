@@ -100,6 +100,7 @@ def create_listing(request):
 
 def listing(request, id):
     product = Listings.objects.get(pk=id)
+    product_comments = Comments.objects.filter(product=id)
     if request.user.is_anonymous:
         is_watchlist = False
     else:
@@ -128,7 +129,8 @@ def listing(request, id):
         "count_bids": len(list(Bids.objects.filter(
             product=product.__dict__['id']).values_list("bid_price", flat=True))),
         "winner": win_user,
-        "win_price": winner_bid
+        "win_price": winner_bid,
+        "comments": product_comments.values_list()
     })
 
 
@@ -136,6 +138,7 @@ def listing(request, id):
 def watchlist_add(request, id):
     product = Listings.objects.get(pk=id)
     item_to_save = get_object_or_404(Listings, pk=id)
+    product_comments = Comments.objects.filter(product=id)
     if Watchlist.objects.filter(user=request.user, item=id).exists():
         # delete
         user_list, created = Watchlist.objects.get_or_create(user=request.user)
@@ -153,7 +156,8 @@ def watchlist_add(request, id):
             "message": "Product has been added to watchlist",
             "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
             "count_bids": len(list(Bids.objects.filter(
-                product=product.__dict__['id']).values_list("bid_price", flat=True)))
+                product=product.__dict__['id']).values_list("bid_price", flat=True))),
+            "comments": product_comments.values_list()
         })
     user_list, created = Watchlist.objects.get_or_create(user=request.user)
     user_list.item.add(item_to_save)
@@ -170,12 +174,15 @@ def watchlist_add(request, id):
         "message": "Product has been deleted to watchlist",
         "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
         "count_bids": len(list(Bids.objects.filter(
-            product=product.__dict__['id']).values_list("bid_price", flat=True)))
+            product=product.__dict__['id']).values_list("bid_price", flat=True))),
+        "comments": product_comments.values_list()
     })
 
 
 def add_bid(request, id):
     product = Listings.objects.get(pk=id)
+    product_comments = Comments.objects.filter(product=id)
+
     if user_by_user(product.__dict__["listed_by"], request.user.username):
         message = "User who created the auction cannot place bids"
     elif check_bid_count(
@@ -206,7 +213,8 @@ def add_bid(request, id):
         "message": message,
         "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
         "count_bids": len(list(Bids.objects.filter(
-            product=product.__dict__['id']).values_list("bid_price", flat=True)))
+            product=product.__dict__['id']).values_list("bid_price", flat=True))),
+        "comments": product_comments.values_list()
     })
 
 def close(request, id):
@@ -220,7 +228,7 @@ def close(request, id):
         winner=Bids.objects.get(bid_price=winner_bid).user_by,
         win_bid=winner_bid
         )
-
+    product_comments = Comments.objects.filter(product=id)
     win_user = Bids.objects.get(bid_price=winner_bid).user_by
 
     return render(request, "auctions/listing.html", {
@@ -236,7 +244,8 @@ def close(request, id):
         "message": "Listing was close. Winner: {0}, price: {1}".format(win_user, winner_bid),
         "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
         "count_bids": len(list(Bids.objects.filter(
-            product=product.__dict__['id']).values_list("bid_price", flat=True)))
+            product=product.__dict__['id']).values_list("bid_price", flat=True))),
+        "comments": product_comments.values_list()
     })
 
 @login_required
@@ -248,15 +257,11 @@ def comments(request, id):
             comment=request.POST["comment"],
             user_by=request.user.username,
             date=datetime.datetime.now(),
-            product=Listings.objects.get(pk=id)
+            product=Listings.objects.get(pk=id).id
         )
-    print(request)
     comment = request.POST["comment"]
-   
-    print(comment)
-    print(product.id)
+
     product_comments = Comments.objects.filter(product=id)
-    print(product_comments)
     return render(request, "auctions/listing.html", {
         "username": request.user.username,
         "name": product.__dict__["name"],
@@ -267,15 +272,9 @@ def comments(request, id):
         "create_date": product.__dict__["create_date"],
         "image_url": product.__dict__["photo"],
         "id": product.__dict__["id"],
-        "message": 'message',
+        "message": None,
         "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
         "count_bids": len(list(Bids.objects.filter(
-            product=product.__dict__['id']).values_list("bid_price", flat=True)))
+            product=product.__dict__['id']).values_list("bid_price", flat=True))),
+        "comments": product_comments.values_list()
     })
-
-
-    # return render(request, "auctions/comments.html", {
-    #     "user":  'user',
-    #     "comment": 'Comment text',
-    #     "date": 'date from db'
-    # })
