@@ -278,3 +278,30 @@ def comments(request, id):
             product=product.__dict__['id']).values_list("bid_price", flat=True))),
         "comments": product_comments.values_list()
     })
+
+def categories(request):
+    categories = Listings.objects.values_list('category')
+    return render(request, "auctions/categories.html", {
+        "categories": categories.distinct()
+    })
+    
+
+def category(request, category):
+    products = Listings.objects.filter(category=category)
+    return render(request, "auctions/index.html", {
+        "listings": list(products.values_list())
+    })
+
+
+def watchlist(request, user_id):
+    user_id = request.user.id
+    watch = Watchlist.objects.filter(user_id=user_id)
+    user_watchlist =[]
+    for i in watch.values_list():
+        user_watchlist += Listings.objects.filter(id=i[0]).values_list()
+    return render(request, "auctions/index.html", {
+        "listings": list(user_watchlist)
+    })
+
+# TODO: watchlist logic (add/delete and view)
+# TODO: watchlist count

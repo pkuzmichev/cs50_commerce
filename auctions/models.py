@@ -27,6 +27,7 @@ class Listings(models.Model):
     winner = models.CharField(max_length=30, default='')
     win_bid = models.FloatField(max_length=30, default=0)
 
+
 class Bids(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     bid_price = models.FloatField(max_length=30)
