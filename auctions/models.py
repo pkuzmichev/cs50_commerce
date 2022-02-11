@@ -4,7 +4,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    watchlist_count = models.IntegerField(max_length=30)
     # 1. read docs https://docs.djangoproject.com/en/3.2/topics/db/models/
     # 2. watch lecture
 

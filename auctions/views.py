@@ -14,6 +14,7 @@ from .models import User, Listings, Bids, Comments, Watchlist
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 
 
 def index(request):
@@ -143,8 +144,9 @@ def watchlist_add(request, id):
     product_comments = Comments.objects.filter(product=id)
     # delete
     if Watchlist.objects.filter(user=request.user, item=id).exists():
-        user_list, created = Watchlist.objects.filter(user=request.user, item=id).delete()
-        # TODO: update db for watchlist page
+        Watchlist.objects.filter(user=request.user, item=id).delete()
+        User.objects.filter(
+            username=request.user).update(watchlist_count=F('watchlist_count')-1)
         return render(request, "auctions/listing.html", {
             "username": request.user.username,
             "name": product.__dict__["name"],
@@ -161,10 +163,11 @@ def watchlist_add(request, id):
                 product=product.__dict__['id']).values_list("bid_price", flat=True))),
             "comments": product_comments.values_list()
         })
+    # add 
     else:
-        print('item_to_save', item_to_save.id)
-        user_list, created = Watchlist.objects.get_or_create(user=request.user, item=item_to_save.id)
-        # user_list.item.add(item_to_save)
+        Watchlist.objects.get_or_create(user=request.user, item=item_to_save.id)
+        User.objects.filter(
+            username=request.user).update(watchlist_count=F('watchlist_count')+1)
     return render(request, "auctions/listing.html", {
         "username": request.user.username,
         "name": product.__dict__["name"],
@@ -324,5 +327,3 @@ def watchlist(request, user_id):
         "listings": list(user_watchlist)
     })
 
-# TODO: watchlist logic (add/delete and view)
-# TODO: watchlist count
