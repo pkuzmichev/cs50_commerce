@@ -44,5 +44,6 @@ class Comments(models.Model):
 
 
 class Watchlist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    item = models.ManyToManyField(Listings)
+    # TODO: bug
+    user = models.CharField(max_length=30)
+    item = models.IntegerField(max_length=30, default=0)

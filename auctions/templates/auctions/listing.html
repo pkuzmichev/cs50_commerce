@@ -2,7 +2,7 @@
 
 {% block body %}
 {% if message == None %}
-{% elif message == 'Bid accepted' %}
+{% elif message == 'Bid accepted' or message == 'Product has been added to watchlist' %}
 <div class="alert alert-success" role="alert">
     {{ message }}
 </div>
@@ -19,12 +19,12 @@
 <div id="outer">
 {% if watchlist %}
 <div class="inner"><a href="{% url 'watchlist_add' id %}" role="button"
-    class="is-watchlist btn btn-outline-success btn-lg">Watchlist</a></div>
+    class="no-wathlist btn btn-outline-danger btn-lg">Remove from watchlist</a></div>
 {% else %}
-<div class="inner"><a href="{% url 'watchlist_add' id %}" role="button" class="no-wathlist btn btn-outline-danger btn-lg">Watchlist</a></div>
+<div class="inner"><a href="{% url 'watchlist_add' id %}" role="button" class="is-watchlist btn btn-outline-success btn-lg">Add to watchlist</a></div>
 {% endif %}
 {% if username == user_by %}
-<div class="inner"><a href="{% url 'close' id %}" role="button" class="is-watchlist btn btn-outline-success btn-lg">Close</a></div>
+<div class="inner"><a href="{% url 'close' id %}" role="button" class="no-wathlist btn btn-outline-danger btn-lg">Close</a></div>
 {% endif %}</div>
 {% if winner == username %}
 <div class="alert alert-primary" role="alert">
@@ -68,28 +68,19 @@
 <div class="comments">
     <div id="rail">
         <h3>Comments:</h3>
-        
-        {% for comment in comments %}
-        <!-- user -->
-        <b>{{ comment.2 }}</b><br>
-        <!-- comments -->
-        {{ comment.1 }}<br>
-        <!-- date -->
-        <sup>{{ comment.3 }}</sup>
+        <b>{{ user }}</b><br>
+        {{ comment }}<br>
+        <sup>{{ date }}</sup>
         <hr>
-        {% endfor %}
-
-        {% if user.is_authenticated %}
-            <form action="{% url 'add_comment' id %}" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <textarea class="form-control" name="comment" type="text" placeholder="Your comment here" required></textarea>
-                </div>
-                <input class="btn btn-primary" type="submit" value="Post">
-            </form>
-        {% else %}
-        {% endif %}
-        
+    
+        <form action="{% url 'add_comment' 1 %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <textarea class="form-control" name="comment" type="text" placeholder="Your comment here"
+                    required></textarea>
+            </div>
+            <input class="btn btn-primary" type="submit" value="Post">
+        </form>
     </div>
 </div>
 

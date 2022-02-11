@@ -13,6 +13,7 @@ from auctions.verify import check_bid_count, user_by_user, get_max_bid
 from .models import User, Listings, Bids, Comments, Watchlist
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def index(request):
@@ -104,6 +105,7 @@ def listing(request, id):
     if request.user.is_anonymous:
         is_watchlist = False
     else:
+        # TODO: bug
         is_watchlist = Watchlist.objects.filter(
             user=request.user, item=id).exists()
 
@@ -139,10 +141,10 @@ def watchlist_add(request, id):
     product = Listings.objects.get(pk=id)
     item_to_save = get_object_or_404(Listings, pk=id)
     product_comments = Comments.objects.filter(product=id)
+    # delete
     if Watchlist.objects.filter(user=request.user, item=id).exists():
-        # delete
-        user_list, created = Watchlist.objects.get_or_create(user=request.user)
-        user_list.item.remove(item_to_save)
+        user_list, created = Watchlist.objects.filter(user=request.user, item=id).delete()
+        # TODO: update db for watchlist page
         return render(request, "auctions/listing.html", {
             "username": request.user.username,
             "name": product.__dict__["name"],
@@ -153,14 +155,16 @@ def watchlist_add(request, id):
             "create_date": product.__dict__["create_date"],
             "image_url": product.__dict__["photo"],
             "id": product.__dict__["id"],
-            "message": "Product has been added to watchlist",
+            "message": "Product has been remove to watchlist",
             "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
             "count_bids": len(list(Bids.objects.filter(
                 product=product.__dict__['id']).values_list("bid_price", flat=True))),
             "comments": product_comments.values_list()
         })
-    user_list, created = Watchlist.objects.get_or_create(user=request.user)
-    user_list.item.add(item_to_save)
+    else:
+        print('item_to_save', item_to_save.id)
+        user_list, created = Watchlist.objects.get_or_create(user=request.user, item=item_to_save.id)
+        # user_list.item.add(item_to_save)
     return render(request, "auctions/listing.html", {
         "username": request.user.username,
         "name": product.__dict__["name"],
@@ -171,7 +175,7 @@ def watchlist_add(request, id):
         "create_date": product.__dict__["create_date"],
         "image_url": product.__dict__["photo"],
         "id": product.__dict__["id"],
-        "message": "Product has been deleted to watchlist",
+        "message": "Product has been added to watchlist",
         "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
         "count_bids": len(list(Bids.objects.filter(
             product=product.__dict__['id']).values_list("bid_price", flat=True))),
@@ -223,13 +227,18 @@ def close(request, id):
     product_bids = Bids.objects.filter(product=id)
     winner_bid = product_bids.filter().aggregate(Max('bid_price'))['bid_price__max']
 
-    Listings.objects.filter(id=id).update(
-        status=True,
-        winner=Bids.objects.get(bid_price=winner_bid).user_by,
-        win_bid=winner_bid
+    try: 
+        Listings.objects.filter(id=id).update(
+            status=True,
+            winner=Bids.objects.get(bid_price=winner_bid).user_by,
+            win_bid=winner_bid
         )
-    product_comments = Comments.objects.filter(product=id)
-    win_user = Bids.objects.get(bid_price=winner_bid).user_by
+        product_comments = Comments.objects.filter(product=id)
+        win_user = Bids.objects.get(bid_price=winner_bid).user_by
+        message = "Listing was close. Winner: {0}, price: {1}".format(
+            win_user, winner_bid)
+    except ObjectDoesNotExist:
+        message = "No bids"
 
     return render(request, "auctions/listing.html", {
         "username": request.user.username,
@@ -241,7 +250,7 @@ def close(request, id):
         "create_date": product.__dict__["create_date"],
         "image_url": product.__dict__["photo"],
         "id": product.__dict__["id"],
-        "message": "Listing was close. Winner: {0}, price: {1}".format(win_user, winner_bid),
+        "message": message,
         "watchlist": Watchlist.objects.filter(user=request.user, item=id).exists(),
         "count_bids": len(list(Bids.objects.filter(
             product=product.__dict__['id']).values_list("bid_price", flat=True))),
@@ -281,6 +290,7 @@ def comments(request, id):
 
 def categories(request):
     categories = Listings.objects.values_list('category')
+    print(list(categories))
     return render(request, "auctions/categories.html", {
         "categories": categories.distinct()
     })
@@ -294,11 +304,22 @@ def category(request, category):
 
 
 def watchlist(request, user_id):
-    user_id = request.user.id
-    watch = Watchlist.objects.filter(user_id=user_id)
-    user_watchlist =[]
+    user_id = request.user.username
+    watch = Watchlist.objects.filter(user=user_id)
+
+    print('watch', watch.values_list())
+
+    user_watchlist = []
+    
+    print('watch', watch)
+    print('user_watchlist', user_watchlist)
+    
     for i in watch.values_list():
-        user_watchlist += Listings.objects.filter(id=i[0]).values_list()
+        print('lolkek', Listings.objects.filter(id=i[2]).values_list())
+        # user_watchlist += Watchlist.objects.filter(item=i[2]).values_list()
+        user_watchlist += Listings.objects.filter(id=i[2]).values_list()
+
+    print('user_watchlist', user_watchlist)
     return render(request, "auctions/index.html", {
         "listings": list(user_watchlist)
     })
