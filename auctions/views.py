@@ -106,7 +106,6 @@ def listing(request, id):
     if request.user.is_anonymous:
         is_watchlist = False
     else:
-        # TODO: bug
         is_watchlist = Watchlist.objects.filter(
             user=request.user, item=id).exists()
 
@@ -205,6 +204,7 @@ def add_bid(request, id):
             product=int(product.__dict__["id"]),
             user_by=request.user
         )
+        Listings.objects.filter(pk=id).update(price=request.POST["bid"])
     else:
         message = "Bid must be higher"
     return render(request, "auctions/listing.html", {
@@ -293,7 +293,6 @@ def comments(request, id):
 
 def categories(request):
     categories = Listings.objects.values_list('category')
-    print(list(categories))
     return render(request, "auctions/categories.html", {
         "categories": categories.distinct()
     })
@@ -309,20 +308,10 @@ def category(request, category):
 def watchlist(request, user_id):
     user_id = request.user.username
     watch = Watchlist.objects.filter(user=user_id)
-
-    print('watch', watch.values_list())
-
     user_watchlist = []
-    
-    print('watch', watch)
-    print('user_watchlist', user_watchlist)
-    
     for i in watch.values_list():
-        print('lolkek', Listings.objects.filter(id=i[2]).values_list())
-        # user_watchlist += Watchlist.objects.filter(item=i[2]).values_list()
         user_watchlist += Listings.objects.filter(id=i[2]).values_list()
 
-    print('user_watchlist', user_watchlist)
     return render(request, "auctions/index.html", {
         "listings": list(user_watchlist)
     })

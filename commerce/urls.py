@@ -18,6 +18,5 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # TODO: https://stackoverflow.com/questions/44651760/django-db-migrations-exceptions-inconsistentmigrationhistory
     path("", include("auctions.urls"))
 ]

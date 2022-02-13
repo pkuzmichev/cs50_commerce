@@ -16,12 +16,14 @@
 <div id="container">
 <div id="content">
 
+{% if user.is_authenticated %}
 <div id="outer">
 {% if watchlist %}
 <div class="inner"><a href="{% url 'watchlist_add' id %}" role="button"
     class="no-wathlist btn btn-outline-danger btn-lg">Remove from watchlist</a></div>
 {% else %}
 <div class="inner"><a href="{% url 'watchlist_add' id %}" role="button" class="is-watchlist btn btn-outline-success btn-lg">Add to watchlist</a></div>
+{% endif %}
 {% endif %}
 {% if username == user_by %}
 <div class="inner"><a href="{% url 'close' id %}" role="button" class="no-wathlist btn btn-outline-danger btn-lg">Close</a></div>
@@ -65,13 +67,22 @@
 </ul>
 
 </div>
+{% if user.is_authenticated %}
 <div class="comments">
     <div id="rail">
-        <h3>Comments:</h3>
-        <b>{{ user }}</b><br>
-        {{ comment }}<br>
-        <sup>{{ date }}</sup>
-        <hr>
+
+
+{% for comment in comments %}
+<!-- user -->
+<b>{{ comment.2 }}</b><br>
+<!-- comments -->
+{{ comment.1 }}<br>
+<!-- date -->
+<sup>{{ comment.3 }}</sup>
+<hr>
+
+{% endfor %}
+
     
         <form action="{% url 'add_comment' 1 %}" method="post">
             {% csrf_token %}
@@ -83,6 +94,7 @@
         </form>
     </div>
 </div>
+{% endif %}
 
 
 </div>
